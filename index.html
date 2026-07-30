@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050505" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ZZ OS" />
+  <title>ZZ OS — Phone Business Dashboard</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --panel: rgba(255, 255, 255, 0.075);
+      --panel2: rgba(255, 255, 255, 0.115);
+      --line: rgba(255, 255, 255, 0.12);
+      --text: #fff7df;
+      --muted: rgba(255, 247, 223, 0.67);
+      --gold: #f5c65b;
+      --gold2: #8f6421;
+      --green: #6af2ad;
+      --red: #ff6b6b;
+      --blue: #8fb7ff;
+      --shadow: 0 28px 80px rgba(0, 0, 0, .55);
+      --radius: 26px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(245,198,91,.25), transparent 26rem),
+        radial-gradient(circle at 95% 10%, rgba(111,68,255,.22), transparent 24rem),
+        linear-gradient(155deg, #050505 0%, #10100c 45%, #050505 100%);
+      overflow-x: hidden;
+      padding-bottom: 98px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.7), transparent 75%);
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { border: 0; cursor: pointer; }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) 16px 24px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      margin: -18px -16px 18px;
+      padding: max(14px, env(safe-area-inset-top)) 16px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(to bottom, rgba(5,5,5,.9), rgba(5,5,5,.48));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .brand { display:flex; align-items:center; gap: 10px; }
+    .logo {
+      width: 42px; height: 42px; border-radius: 15px;
+      display:grid; place-items:center;
+      color: #1b1204; font-weight: 1000; letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff4bd, #f5c65b 42%, #7f4a0d);
+      box-shadow: 0 14px 38px rgba(245,198,91,.23);
+    }
+    .brand h1 { margin:0; font-size: 18px; letter-spacing: -.5px; }
+    .brand p { margin:1px 0 0; font-size: 12px; color: var(--muted); }
+    .pill {
+      display:inline-flex; align-items:center; gap: 7px;
+      padding: 9px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(245,198,91,.24);
+      background: rgba(245,198,91,.1);
+      color: #ffe39b;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .view { display: none; animation: rise .35s ease both; }
+    .view.active { display:block; }
+    @keyframes rise { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+    .hero {
+      border: 1px solid rgba(245,198,91,.18);
+      background:
+        linear-gradient(140deg, rgba(245,198,91,.18), rgba(255,255,255,.07) 38%, rgba(255,255,255,.03)),
+        radial-gradient(circle at top right, rgba(245,198,91,.32), transparent 15rem);
+      box-shadow: var(--shadow);
+      border-radius: 34px;
+      padding: 22px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero::after {
+      content: "";
+      position:absolute; inset: auto -80px -120px auto;
+      width: 240px; height:240px; border-radius:999px;
+      background: rgba(245,198,91,.16); filter: blur(26px);
+    }
+    .eyebrow { color: var(--gold); font-weight: 800; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+    .hero h2 { margin: 8px 0 8px; font-size: clamp(34px, 9vw, 66px); line-height: .92; letter-spacing: -2.6px; max-width: 820px; }
+    .hero p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.45; max-width: 680px; }
+    .hero-actions { margin-top: 18px; display:flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap: 9px;
+      min-height: 48px;
+      border-radius: 17px;
+      padding: 12px 16px;
+      color: var(--text);
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 10px 28px rgba(0,0,0,.18);
+      font-weight: 800;
+      text-decoration:none;
+    }
+    .btn.primary { color:#171003; background: linear-gradient(135deg, #fff2b2, #f5c65b 48%, #a46a18); border-color: rgba(245,198,91,.55); }
+    .btn.ghost { background: rgba(255,255,255,.055); }
+    .btn.small { min-height: 38px; border-radius: 13px; padding: 9px 11px; font-size: 13px; }
+    .btn:active { transform: scale(.985); }
+
+    .grid { display:grid; gap: 14px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .section { margin-top: 16px; }
+    .section-title { display:flex; align-items:end; justify-content:space-between; gap: 12px; margin: 22px 4px 10px; }
+    .section-title h3 { margin:0; font-size: 22px; letter-spacing:-.8px; }
+    .section-title span { color: var(--muted); font-size: 13px; }
+
+    .card {
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, rgba(255,255,255,.105), rgba(255,255,255,.045));
+      backdrop-filter: blur(18px);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.22);
+    }
+    .stat { min-height: 122px; display:flex; flex-direction:column; justify-content:space-between; }
+    .stat label { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; }
+    .stat strong { display:block; margin-top: 8px; font-size: 31px; letter-spacing:-1.5px; }
+    .stat small { color: var(--muted); }
+
+    .progress { height: 10px; background: rgba(255,255,255,.09); border-radius: 999px; overflow:hidden; margin-top: 12px; }
+    .bar { height: 100%; width:0%; background: linear-gradient(90deg, var(--gold), #fff1ad); border-radius:999px; transition: width .4s ease; }
+
+    .task { display:flex; gap: 12px; align-items:flex-start; padding: 12px; border-radius: 18px; background: rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.08); }
+    .task .check { width: 28px; height:28px; border-radius: 10px; display:grid; place-items:center; background: rgba(245,198,91,.16); color: var(--gold); flex:none; }
+    .task b { display:block; margin-bottom: 2px; }
+    .task p { margin:0; color: var(--muted); font-size: 13px; line-height:1.35; }
+
+    .form { display:grid; gap: 10px; }
+    .field label { display:block; color: var(--muted); font-size: 12px; margin: 0 0 6px 3px; font-weight: 800; letter-spacing:.06em; text-transform:uppercase; }
+    input, textarea, select {
+      width:100%;
+      color: var(--text);
+      background: rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.13);
+      border-radius: 16px;
+      outline:none;
+      padding: 13px 14px;
+    }
+    textarea { min-height: 120px; resize: vertical; line-height:1.45; }
+    input:focus, textarea:focus, select:focus { border-color: rgba(245,198,91,.55); box-shadow: 0 0 0 4px rgba(245,198,91,.09); }
+
+    .output {
+      white-space: pre-wrap;
+      color: #fff6d6;
+      line-height:1.45;
+      background: rgba(0,0,0,.32);
+      border:1px solid rgba(245,198,91,.14);
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 140px;
+    }
+
+    .client-row { display:flex; align-items:center; justify-content:space-between; gap: 12px; padding: 13px; border-radius: 18px; background: rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.08); }
+    .avatar { width:42px; height:42px; border-radius:15px; display:grid; place-items:center; background:rgba(245,198,91,.16); color:var(--gold); font-weight:1000; flex:none; }
+    .client-meta { flex:1; min-width:0; }
+    .client-meta b { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .client-meta span { color:var(--muted); font-size:12px; }
+    .badge { display:inline-flex; align-items:center; padding: 7px 9px; border-radius:999px; font-size:12px; font-weight:800; background:rgba(255,255,255,.08); color:var(--muted); border:1px solid rgba(255,255,255,.1); white-space:nowrap; }
+    .badge.paid { color:#bfffdc; background:rgba(106,242,173,.12); border-color:rgba(106,242,173,.22); }
+    .badge.due { color:#ffd0d0; background:rgba(255,107,107,.12); border-color:rgba(255,107,107,.22); }
+
+    .pipeline { display:grid; grid-template-columns: repeat(4, minmax(170px, 1fr)); gap: 12px; overflow-x:auto; padding-bottom:8px; }
+    .lane { background: rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.09); border-radius:22px; padding:12px; min-height: 170px; }
+    .lane h4 { margin:0 0 10px; font-size:14px; color:var(--muted); display:flex; justify-content:space-between; }
+    .lead-card { padding:11px; border-radius:16px; background:rgba(255,255,255,.07); margin-bottom:9px; border:1px solid rgba(255,255,255,.08); }
+    .lead-card b { display:block; font-size:14px; }
+    .lead-card span { color:var(--muted); font-size:12px; }
+
+    .bottom-nav {
+      position: fixed;
+      left: 10px; right: 10px; bottom: max(10px, env(safe-area-inset-bottom));
+      z-index: 20;
+      display:grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+      max-width: 560px; margin: 0 auto;
+      padding: 8px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(8,8,8,.82);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 20px 70px rgba(0,0,0,.58);
+    }
+    .nav-btn {
+      min-height: 54px;
+      border-radius: 18px;
+      color: var(--muted);
+      background: transparent;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .nav-btn span { font-size:18px; line-height:1; }
+    .nav-btn.active { color:#171003; background: linear-gradient(135deg, #fff2b2, #f5c65b 48%, #a46a18); }
+
+    .toast {
+      position: fixed;
+      left: 50%; bottom: 92px;
+      transform: translateX(-50%) translateY(18px);
+      background: rgba(245,198,91,.96);
+      color:#171003;
+      font-weight: 900;
+      padding: 12px 14px;
+      border-radius: 999px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.38);
+      opacity:0; pointer-events:none; transition:.25s ease; z-index:40;
+    }
+    .toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+
+    .desktop-shell { display:grid; grid-template-columns: 1fr; gap: 16px; }
+    .install-tip { color: var(--muted); font-size:13px; line-height:1.35; }
+
+    @media (min-width: 800px) {
+      body { padding-bottom: 24px; }
+      .app { padding-inline: 22px; }
+      .desktop-shell { grid-template-columns: 230px 1fr; align-items:start; }
+      .side { position: sticky; top: 86px; display:block; }
+      .bottom-nav { position: sticky; top: 86px; bottom: auto; left:auto; right:auto; display:flex; flex-direction:column; max-width:none; margin:0; }
+      .nav-btn { flex-direction:row; justify-content:flex-start; padding:0 14px; font-size:14px; }
+      .hero { padding: 34px; }
+    }
+    @media (max-width: 720px) {
+      .grid.two, .grid.three { grid-template-columns: 1fr; }
+      .topbar .pill { display:none; }
+      .hero h2 { font-size: 42px; }
+      .section-title { align-items:start; flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">ZZ</div>
+        <div>
+          <h1>ZZ OS</h1>
+          <p>phone-first money dashboard</p>
+        </div>
+      </div>
+      <div class="pill"><span>●</span> V1 live</div>
+    </header>
+
+    <div class="desktop-shell">
+      <aside class="side">
+        <nav class="bottom-nav" aria-label="Main navigation">
+          <button class="nav-btn active" data-target="dashboard"><span>🏠</span>Home</button>
+          <button class="nav-btn" data-target="ai"><span>🤖</span>AI</button>
+          <button class="nav-btn" data-target="clients"><span>👥</span>Clients</button>
+          <button class="nav-btn" data-target="money"><span>💰</span>Money</button>
+          <button class="nav-btn" data-target="settings"><span>⚙️</span>Setup</button>
+        </nav>
+      </aside>
+
+      <main>
+        <section id="dashboard" class="view active">
+          <div class="hero">
+            <div class="eyebrow">Owner mode</div>
+            <h2>Build $1K/month from your phone.</h2>
+            <p>ZZ OS keeps the business simple: recurring promo clients, AI-generated messages, tracked follow-ups, and money math that stays in front of you.</p>
+            <div class="hero-actions">
+              <button class="btn primary" data-target="ai">Start today</button>
+              <button class="btn ghost" data-target="settings">Set payment link</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="grid three">
+              <div class="card stat">
+                <label>Monthly recurring</label>
+                <div><strong id="mrrStat">$0</strong><small id="clientCountStat">0 active clients</small></div>
+              </div>
+              <div class="card stat">
+                <label>Goal progress</label>
+                <div><strong id="goalStat">0%</strong><small>$1,000/month target</small><div class="progress"><div id="goalBar" class="bar"></div></div></div>
+              </div>
+              <div class="card stat">
+                <label>Next move</label>
+                <div><strong id="nextMoveStat">3</strong><small>leads to add today</small></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title"><h3>Today only</h3><span>Keep it under 10 minutes</span></div>
+          <div class="grid">
+            <div class="task"><div class="check">1</div><div><b>Add 3 businesses</b><p>Food, detailing, barber, gym, cigar lounge, beauty, or cleaning. Do not overthink it.</p></div></div>
+            <div class="task"><div class="check">2</div><div><b>Generate one message</b><p>Use the AI tab, copy it, send it, then stop. The app tracks the lead.</p></div></div>
+            <div class="task"><div class="check">3</div><div><b>Only follow warm replies</b><p>No arguing, no chasing. Move replies to proposal, then paid.</p></div></div>
+          </div>
+        </section>
+
+        <section id="ai" class="view">
+          <div class="section-title"><h3>AI workspace</h3><span>Copy/paste scripts built for your offer</span></div>
+          <div class="grid two">
+            <div class="card">
+              <div class="form">
+                <div class="field"><label>Business name</label><input id="aiBusiness" placeholder="Example: Gulf Coast Detailing"></div>
+                <div class="field"><label>Niche</label><select id="aiNiche"><option>Restaurant</option><option>Food truck</option><option>Barber</option><option>Car detailer</option><option>Gym</option><option>Cigar lounge</option><option>Cleaning company</option><option>Nail tech</option><option>Clothing brand</option></select></div>
+                <div class="field"><label>What they need</label><input id="aiProblem" placeholder="Their page looks inactive / no promos / weak captions"></div>
+                <div class="grid two">
+                  <button class="btn primary" id="genOutreach">Cold DM</button>
+                  <button class="btn" id="genFollow">Follow-up</button>
+                  <button class="btn" id="genClose">Close</button>
+                  <button class="btn" id="genDelivery">Delivery plan</button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div id="aiOutput" class="output">Tap a button to generate your message.</div>
+              <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                <button class="btn primary" id="copyAI">Copy text</button>
+                <button class="btn" id="saveLeadFromAI">Save as lead</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="clients" class="view">
+          <div class="section-title"><h3>Clients & pipeline</h3><span>Track who can turn into recurring money</span></div>
+          <div class="grid two">
+            <div class="card">
+              <div class="form">
+                <div class="field"><label>Business</label><input id="leadName" placeholder="Business name"></div>
+                <div class="field"><label>Contact / page</label><input id="leadContact" placeholder="Instagram, email, phone, or link"></div>
+                <div class="field"><label>Status</label><select id="leadStatus"><option>Lead</option><option>Messaged</option><option>Replied</option><option>Proposal</option><option>Paid</option></select></div>
+                <button class="btn primary" id="addLead">Add lead</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="section-title" style="margin-top:0;"><h3 style="font-size:18px;">Active clients</h3><span id="activeClientsMini">0</span></div>
+              <div id="clientList" class="grid"></div>
+            </div>
+          </div>
+
+          <div class="section-title"><h3>Pipeline</h3><span>Swipe sideways on phone</span></div>
+          <div id="pipeline" class="pipeline"></div>
+        </section>
+
+        <section id="money" class="view">
+          <div class="section-title"><h3>Money</h3><span>Simple recurring revenue math</span></div>
+          <div class="grid three">
+            <div class="card stat"><label>Price</label><div><strong id="priceStat">$149</strong><small>per client/month</small></div></div>
+            <div class="card stat"><label>Needed for $1K</label><div><strong id="neededStat">7</strong><small>clients at your price</small></div></div>
+            <div class="card stat"><label>Remaining</label><div><strong id="remainingStat">$1,000</strong><small>to goal</small></div></div>
+          </div>
+          <div class="section-title"><h3>Payment message</h3><span>Use after someone says yes</span></div>
+          <div class="card">
+            <div id="paymentMessage" class="output"></div>
+            <button class="btn primary" id="copyPay" style="margin-top:10px;">Copy payment message</button>
+          </div>
+        </section>
+
+        <section id="settings" class="view">
+          <div class="section-title"><h3>Setup</h3><span>Saves on this phone</span></div>
+          <div class="card">
+            <div class="form">
+              <div class="field"><label>Your business name</label><input id="businessName" placeholder="ZZ Promo / ZZ OS"></div>
+              <div class="field"><label>Your name</label><input id="ownerName" placeholder="Greg / ZZ"></div>
+              <div class="field"><label>City / area</label><input id="city" placeholder="Navarre / Pensacola / Fort Walton"></div>
+              <div class="field"><label>Monthly price</label><input id="price" type="number" inputmode="numeric" placeholder="149"></div>
+              <div class="field"><label>Payment link</label><input id="paymentLink" placeholder="Cash App, Square, Stripe, PayPal link"></div>
+              <button class="btn primary" id="saveSettings">Save setup</button>
+              <p class="install-tip">iPhone install: open the live website in Safari → Share button → Add to Home Screen.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Copied</div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n || 0));
+    const storeKey = 'zz-os-v1-state';
+
+    const defaultState = {
+      settings: { businessName: 'ZZ Promo', ownerName: 'ZZ', city: 'your area', price: 149, paymentLink: '' },
+      leads: []
+    };
+
+    let state = load();
+
+    function load(){
+      try { return { ...defaultState, ...(JSON.parse(localStorage.getItem(storeKey)) || {}) }; }
+      catch { return defaultState; }
+    }
+    function save(){ localStorage.setItem(storeKey, JSON.stringify(state)); render(); }
+    function toast(msg='Done'){
+      const t = $('toast'); t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1200);
+    }
+    async function copyText(text){
+      try { await navigator.clipboard.writeText(text); toast('Copied'); }
+      catch { toast('Press and hold to copy'); }
+    }
+
+    function showView(id){
+      document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id));
+      document.querySelectorAll('[data-target]').forEach(b => b.classList.toggle('active', b.dataset.target === id && b.classList.contains('nav-btn')));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('[data-target]');
+      if (target) showView(target.dataset.target);
+    });
+
+    function script(type){
+      const s = state.settings;
+      const business = $('aiBusiness').value.trim() || '[Business Name]';
+      const niche = $('aiNiche').value;
+      const problem = $('aiProblem').value.trim() || 'your page could look more active and professional';
+      const price = fmt(s.price);
+      const pay = s.paymentLink ? `\n\nPayment link: ${s.paymentLink}` : '';
+
+      if (type === 'outreach') return `Hey ${business}, I’m local to ${s.city} and I’m building simple promo systems for ${niche.toLowerCase()} businesses.\n\nI noticed ${problem}. I can make your page look more active with an AI Promo Pack: posts, captions, flyer ideas, and a monthly content plan.\n\nI’m doing the starter package for ${price}/month so you don’t have to think about content every week. Want me to send a quick sample idea for your page?`;
+
+      if (type === 'follow') return `Hey ${business}, quick follow-up. I can put together a simple promo plan for your page this week: content ideas, captions, and a clean monthly posting direction.\n\nNo pressure — I just think your business could look more active online without you having to do the editing yourself.`;
+
+      if (type === 'close') return `Bet. The starter plan is ${price}/month. That covers your monthly promo direction, captions, post ideas, and simple content support so your page stays active.\n\nI can start once payment is sent and I’ll send the first batch for approval before anything is posted.${pay}`;
+
+      return `Monthly delivery plan for ${business}\n\n1. Create 8 post ideas for a ${niche.toLowerCase()} in ${s.city}.\n2. Write captions that sound local, simple, and not robotic.\n3. Create 1 promo flyer concept.\n4. Create 1 weekly posting calendar.\n5. Make the call-to-action clear: message, visit, book, order, or call.\n\nTone: clean, confident, local, and direct.\nProblem to solve: ${problem}.`;
+    }
+
+    $('genOutreach').addEventListener('click', () => $('aiOutput').textContent = script('outreach'));
+    $('genFollow').addEventListener('click', () => $('aiOutput').textContent = script('follow'));
+    $('genClose').addEventListener('click', () => $('aiOutput').textContent = script('close'));
+    $('genDelivery').addEventListener('click', () => $('aiOutput').textContent = script('delivery'));
+    $('copyAI').addEventListener('click', () => copyText($('aiOutput').textContent));
+    $('saveLeadFromAI').addEventListener('click', () => {
+      const name = $('aiBusiness').value.trim();
+      if (!name) return toast('Add business name first');
+      state.leads.unshift({ id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(), name, contact: $('aiNiche').value, status: 'Messaged', created: Date.now() });
+      save(); toast('Lead saved'); showView('clients');
+    });
+
+    $('addLead').addEventListener('click', () => {
+      const name = $('leadName').value.trim();
+      if (!name) return toast('Add business name');
+      state.leads.unshift({ id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(), name, contact: $('leadContact').value.trim(), status: $('leadStatus').value, created: Date.now() });
+      $('leadName').value = ''; $('leadContact').value = ''; $('leadStatus').value = 'Lead';
+      save(); toast('Lead added');
+    });
+
+    $('saveSettings').addEventListener('click', () => {
+      state.settings = {
+        businessName: $('businessName').value.trim() || 'ZZ Promo',
+        ownerName: $('ownerName').value.trim() || 'ZZ',
+        city: $('city').value.trim() || 'your area',
+        price: Number($('price').value || 149),
+        paymentLink: $('paymentLink').value.trim()
+      };
+      save(); toast('Setup saved');
+    });
+
+    $('copyPay').addEventListener('click', () => copyText($('paymentMessage').textContent));
+
+    function setLeadStatus(id, status){
+      state.leads = state.leads.map(l => l.id === id ? { ...l, status } : l);
+      save();
+    }
+    window.setLeadStatus = setLeadStatus;
+
+    function render(){
+      const s = state.settings;
+      $('businessName').value = s.businessName || '';
+      $('ownerName').value = s.ownerName || '';
+      $('city').value = s.city || '';
+      $('price').value = s.price || 149;
+      $('paymentLink').value = s.paymentLink || '';
+
+      const active = state.leads.filter(l => l.status === 'Paid');
+      const mrr = active.length * Number(s.price || 149);
+      const goal = Math.min(100, Math.round((mrr / 1000) * 100));
+      const needed = Math.ceil(1000 / Number(s.price || 149));
+      const remaining = Math.max(0, 1000 - mrr);
+
+      $('mrrStat').textContent = fmt(mrr);
+      $('clientCountStat').textContent = `${active.length} active client${active.length === 1 ? '' : 's'}`;
+      $('goalStat').textContent = `${goal}%`;
+      $('goalBar').style.width = `${goal}%`;
+      $('nextMoveStat').textContent = Math.max(0, 3 - state.leads.filter(l => Date.now() - l.created < 86400000).length);
+      $('priceStat').textContent = fmt(s.price || 149);
+      $('neededStat').textContent = needed;
+      $('remainingStat').textContent = fmt(remaining);
+      $('activeClientsMini').textContent = active.length;
+
+      $('paymentMessage').textContent = `Here’s the starter package:\n\n${s.businessName || 'ZZ Promo'} — Monthly Promo Pack\nPrice: ${fmt(s.price || 149)}/month\nIncludes: promo ideas, captions, flyer concept, and a simple content plan so your page stays active.\n\nSend payment here and I’ll start the first batch today:${s.paymentLink ? `\n${s.paymentLink}` : '\n[add your payment link in Setup]'}`;
+
+      const clientList = $('clientList');
+      clientList.innerHTML = active.length ? active.map(l => rowHtml(l, true)).join('') : `<div class="task"><div class="check">$</div><div><b>No paid clients yet</b><p>Move a lead to Paid and this becomes your client list.</p></div></div>`;
+
+      const statuses = ['Lead','Messaged','Replied','Proposal','Paid'];
+      $('pipeline').innerHTML = statuses.map(st => {
+        const leads = state.leads.filter(l => l.status === st);
+        return `<div class="lane"><h4><span>${st}</span><span>${leads.length}</span></h4>${leads.map(l => leadCard(l)).join('') || '<div class="lead-card"><span>Empty</span></div>'}</div>`;
+      }).join('');
+    }
+
+    function rowHtml(l){
+      return `<div class="client-row"><div class="avatar">${escapeHtml(l.name[0] || 'Z')}</div><div class="client-meta"><b>${escapeHtml(l.name)}</b><span>${escapeHtml(l.contact || 'No contact saved')}</span></div><span class="badge paid">Paid</span></div>`;
+    }
+
+    function leadCard(l){
+      const next = l.status === 'Lead' ? 'Messaged' : l.status === 'Messaged' ? 'Replied' : l.status === 'Replied' ? 'Proposal' : l.status === 'Proposal' ? 'Paid' : 'Paid';
+      return `<div class="lead-card"><b>${escapeHtml(l.name)}</b><span>${escapeHtml(l.contact || '')}</span><div style="display:flex; gap:6px; margin-top:9px; flex-wrap:wrap;"><button class="btn small" onclick="setLeadStatus('${l.id}','${next}')">Move → ${next}</button></div></div>`;
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
+
+    render();
+  </script>
+</body>
+</html>
